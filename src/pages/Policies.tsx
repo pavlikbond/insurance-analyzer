@@ -1,10 +1,8 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { usePolicies } from "@/hooks/usePolicies";
-import { useBatchAnalysis } from "@/hooks/usePolicies";
 import { useDeletePolicy } from "@/hooks/usePolicies";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,56 +14,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { FileText, Upload, Trash2, FileSearch } from "lucide-react";
+import { FileText, Upload, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export function Policies() {
-  const [selectedPolicies, setSelectedPolicies] = useState<Set<string>>(new Set());
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [policyToDelete, setPolicyToDelete] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const { data: policiesData, isLoading } = usePolicies();
-  const batchAnalysis = useBatchAnalysis();
   const deletePolicy = useDeletePolicy();
 
   const policies = policiesData?.policies || [];
 
-  const toggleSelect = (policyId: string) => {
-    const newSelected = new Set(selectedPolicies);
-    if (newSelected.has(policyId)) {
-      newSelected.delete(policyId);
-    } else {
-      newSelected.add(policyId);
-    }
-    setSelectedPolicies(newSelected);
-  };
-
-  const toggleSelectAll = () => {
-    if (selectedPolicies.size === policies.length) {
-      setSelectedPolicies(new Set());
-    } else {
-      setSelectedPolicies(new Set(policies.map((p) => p.id)));
-    }
-  };
-
-  const handleGetReport = async () => {
-    if (selectedPolicies.size === 0) {
-      toast.error("Please select at least one policy");
-      return;
-    }
-
-    try {
-      await batchAnalysis.mutateAsync({
-        policyIds: Array.from(selectedPolicies),
-      });
-      toast.success("Analysis started for selected policies. You will be notified when complete.");
-      setSelectedPolicies(new Set());
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to start analysis");
-    }
-  };
-
-  const handleDeleteClick = (policyId: string) => {
+  const handleDeleteClick = (e: React.MouseEvent, policyId: string) => {
+    e.stopPropagation();
     setPolicyToDelete(policyId);
     setDeleteDialogOpen(true);
   };
@@ -83,9 +46,9 @@ export function Policies() {
     }
   };
 
-  const uploadedPolicies = policies.filter((p) => p.status === "uploaded");
-  const canAnalyze =
-    selectedPolicies.size > 0 && Array.from(selectedPolicies).every((id) => uploadedPolicies.some((p) => p.id === id));
+  const handleRowClick = (policyId: string) => {
+    navigate(`/policies/${policyId}`);
+  };
 
   return (
     <div className="space-y-6">
@@ -102,29 +65,10 @@ export function Policies() {
         </Link>
       </div>
 
-      {selectedPolicies.size > 0 && (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">
-                  {selectedPolicies.size} policy{selectedPolicies.size !== 1 ? "ies" : ""} selected
-                </p>
-                <p className="text-sm text-muted-foreground">Click "Get Report" to analyze selected policies</p>
-              </div>
-              <Button onClick={handleGetReport} disabled={!canAnalyze || batchAnalysis.isPending}>
-                <FileSearch className="mr-2 h-4 w-4" />
-                Get Report
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       <Card>
         <CardHeader>
           <CardTitle>All Policies</CardTitle>
-          <CardDescription>Select policies and click "Get Report" to analyze them</CardDescription>
+          <CardDescription>Click on a policy to view details and generate reports</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -141,12 +85,6 @@ export function Policies() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-12">
-                    <Checkbox
-                      checked={selectedPolicies.size === policies.length && policies.length > 0}
-                      onCheckedChange={toggleSelectAll}
-                    />
-                  </TableHead>
                   <TableHead>File Name</TableHead>
                   <TableHead>Coverage Period</TableHead>
                   <TableHead>Description</TableHead>
@@ -157,18 +95,12 @@ export function Policies() {
               </TableHeader>
               <TableBody>
                 {policies.map((policy) => (
-                  <TableRow key={policy.id}>
-                    <TableCell>
-                      <Checkbox
-                        checked={selectedPolicies.has(policy.id)}
-                        onCheckedChange={() => toggleSelect(policy.id)}
-                      />
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      <Link to={`/policies/${policy.id}`} className="hover:underline">
-                        {policy.originalFileName}
-                      </Link>
-                    </TableCell>
+                  <TableRow
+                    key={policy.id}
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => handleRowClick(policy.id)}
+                  >
+                    <TableCell className="font-medium">{policy.originalFileName}</TableCell>
                     <TableCell>
                       {new Date(policy.coverageStart).toLocaleDateString()}
                       {policy.coverageEnd && ` - ${new Date(policy.coverageEnd).toLocaleDateString()}`}
@@ -190,8 +122,13 @@ export function Policies() {
                       </Badge>
                     </TableCell>
                     <TableCell>{new Date(policy.uploadedAt).toLocaleDateString()}</TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(policy.id)}>
+                    <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => handleDeleteClick(e, policy.id)}
+                        className="hover:bg-destructive/10 hover:text-destructive"
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </TableCell>

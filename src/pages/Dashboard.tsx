@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
 import { usePolicies } from "@/hooks/usePolicies";
 import { useUser } from "@/hooks/useUser";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Upload, BarChart3, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 export function Dashboard() {
   const { data: policiesData, isLoading: policiesLoading } = usePolicies();
@@ -22,7 +23,48 @@ export function Dashboard() {
         <p className="text-muted-foreground mt-2">Manage and analyze your insurance policies</p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* Mobile: Combined card */}
+      <Card className="md:hidden">
+        <CardHeader>
+          <CardTitle className="text-lg">Policy Overview</CardTitle>
+          <CardDescription>Your insurance policy statistics</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <FileText className="h-4 w-4" />
+                <span>Total Policies</span>
+              </div>
+              <div className="text-2xl font-bold">{policies.length}</div>
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <BarChart3 className="h-4 w-4" />
+                <span>Analyzed</span>
+              </div>
+              <div className="text-2xl font-bold">{analyzedCount}</div>
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Upload className="h-4 w-4" />
+                <span>Ready to Analyze</span>
+              </div>
+              <div className="text-2xl font-bold">{uploadedCount}</div>
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <AlertCircle className="h-4 w-4" />
+                <span>Processing</span>
+              </div>
+              <div className="text-2xl font-bold">{processingCount}</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Desktop: Separate cards */}
+      <div className="hidden gap-4 md:grid md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Policies</CardTitle>
@@ -77,18 +119,16 @@ export function Dashboard() {
             <CardDescription>Get started with your policies</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
-            <Link to="/upload">
-              <Button className="w-full" variant="default">
+            <div className="grid gap-8 mt-auto">
+              <Link to="/upload" className={cn(buttonVariants({ variant: "default" }), "w-full")}>
                 <Upload className="mr-2 h-4 w-4" />
                 Upload New Policy
-              </Button>
-            </Link>
-            <Link to="/policies">
-              <Button className="w-full" variant="outline">
+              </Link>
+              <Link to="/policies" className={cn(buttonVariants({ variant: "outline" }), "w-full")}>
                 <FileText className="mr-2 h-4 w-4" />
                 View All Policies
-              </Button>
-            </Link>
+              </Link>
+            </div>
           </CardContent>
         </Card>
 

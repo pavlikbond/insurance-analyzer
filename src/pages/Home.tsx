@@ -82,7 +82,7 @@ export function Home() {
                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
                   <BarChart3 className="h-6 w-6 text-primary" />
                 </div>
-                <CardTitle>Year-over-Year Comparison</CardTitle>
+                <CardTitle>Year-over-Year Reports</CardTitle>
                 <CardDescription>
                   Automatically compare your current policy with previous years to spot changes in coverage, premiums,
                   and terms
@@ -220,7 +220,7 @@ export function Home() {
                   {[
                     "Unlimited policy uploads",
                     "AI-powered analysis",
-                    "Year-over-year comparisons",
+                    "Year-over-year reports",
                     "Coverage gap detection",
                     "Email notifications",
                   ].map((feature) => (

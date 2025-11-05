@@ -1,10 +1,11 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import type { MultipartFile } from "@fastify/multipart";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { eq, and, sql, desc } from "drizzle-orm";
 import { appConfig } from "../config/index.js";
 import { db } from "../db/index.js";
-import { contracts, type Contract } from "../db/schema.js";
+import { contracts, analyses, type Contract } from "../db/schema.js";
 import { requireAuth } from "../middleware/auth.js";
 import { sendErrorResponse } from "../utils/errors.js";
 import { ErrorCode } from "../types/index.js";
@@ -339,6 +340,142 @@ async function uploadPolicy(request: FastifyRequest, reply: FastifyReply) {
 }
 
 /**
+ * GET /api/policies/:id
+ * Get a single policy by ID
+ */
+async function getPolicy(request: FastifyRequest, reply: FastifyReply) {
+  try {
+    // Require authentication
+    await requireAuth(request, reply);
+    const user = request.user;
+    if (!user) {
+      request.log.warn("Authentication failed or user not found");
+      return;
+    }
+
+    const { id } = request.params as { id: string };
+
+    if (!id) {
+      return sendErrorResponse(reply, 400, ErrorCode.VALIDATION_ERROR, "Policy ID is required");
+    }
+
+    // Get policy from database, ensuring it belongs to the user and is not deleted
+    const [policy] = await db
+      .select({
+        id: contracts.id,
+        fileName: contracts.fileName,
+        originalFileName: contracts.originalFileName,
+        coverageStart: contracts.coverageStart,
+        coverageEnd: contracts.coverageEnd,
+        description: contracts.description,
+        status: contracts.status,
+        fileSize: contracts.fileSize,
+        uploadedAt: contracts.uploadedAt,
+        processedAt: contracts.processedAt,
+        s3Key: contracts.s3Key,
+        s3Bucket: contracts.s3Bucket,
+      })
+      .from(contracts)
+      .where(and(eq(contracts.id, id), eq(contracts.userId, user.id), eq(contracts.isDeleted, false)))
+      .limit(1);
+
+    if (!policy) {
+      return sendErrorResponse(reply, 404, ErrorCode.NOT_FOUND, "Policy not found");
+    }
+
+    // Generate presigned URL for S3 download (valid for 1 hour)
+    let s3Url: string | undefined;
+    try {
+      const getObjectCommand = new GetObjectCommand({
+        Bucket: policy.s3Bucket,
+        Key: policy.s3Key,
+      });
+
+      s3Url = await getSignedUrl(s3Client, getObjectCommand, { expiresIn: 3600 }); // 1 hour
+    } catch (s3Error) {
+      request.log.error(s3Error, "Failed to generate presigned URL");
+      // Continue without s3Url - the policy can still be viewed without download
+    }
+
+    // Format response
+    return reply.status(200).send({
+      id: policy.id,
+      fileName: policy.fileName,
+      originalFileName: policy.originalFileName,
+      coverageStart: policy.coverageStart,
+      coverageEnd: policy.coverageEnd || undefined,
+      description: policy.description || undefined,
+      status: policy.status,
+      fileSize: policy.fileSize,
+      uploadedAt: policy.uploadedAt.toISOString(),
+      processedAt: policy.processedAt?.toISOString() || undefined,
+      s3Url: s3Url,
+    });
+  } catch (error) {
+    request.log.error(error, "Error fetching policy");
+    return sendErrorResponse(reply, 500, ErrorCode.INTERNAL_ERROR, "Failed to fetch policy");
+  }
+}
+
+/**
+ * GET /api/policies/:id/analysis
+ * Get the analysis for a specific policy
+ */
+async function getPolicyAnalysis(request: FastifyRequest, reply: FastifyReply) {
+  try {
+    // Require authentication
+    await requireAuth(request, reply);
+    const user = request.user;
+    if (!user) {
+      request.log.warn("Authentication failed or user not found");
+      return;
+    }
+
+    const { id } = request.params as { id: string };
+
+    if (!id) {
+      return sendErrorResponse(reply, 400, ErrorCode.VALIDATION_ERROR, "Policy ID is required");
+    }
+
+    // Verify the policy belongs to the user
+    const [contract] = await db
+      .select()
+      .from(contracts)
+      .where(and(eq(contracts.id, id), eq(contracts.userId, user.id), eq(contracts.isDeleted, false)))
+      .limit(1);
+
+    if (!contract) {
+      return sendErrorResponse(reply, 404, ErrorCode.NOT_FOUND, "Policy not found");
+    }
+
+    // Get analysis for this contract
+    const [analysis] = await db.select().from(analyses).where(eq(analyses.contractId, id)).limit(1);
+
+    if (!analysis) {
+      return sendErrorResponse(reply, 404, ErrorCode.NOT_FOUND, "Analysis not found for this policy");
+    }
+
+    // Format response to match Analysis type
+    return reply.status(200).send({
+      id: analysis.id,
+      policyId: analysis.contractId,
+      aiModel: analysis.aiModel,
+      analysisResult: analysis.analysisResult,
+      createdAt: analysis.createdAt.toISOString(),
+      // Legacy fields for backwards compatibility - these will be empty but won't break the frontend
+      summary: "", // Empty for backwards compatibility
+      keyTerms: {},
+      exclusions: [],
+      premiums: {},
+      coverageDetails: {},
+    });
+  } catch (error) {
+    request.log.error(error, "Error fetching policy analysis");
+    return sendErrorResponse(reply, 500, ErrorCode.INTERNAL_ERROR, "Failed to fetch policy analysis");
+  }
+}
+
+/**
  * DELETE /api/policies/:id
  * Soft delete a policy (sets isDeleted flag to true)
  */
@@ -394,6 +531,8 @@ async function deletePolicy(request: FastifyRequest, reply: FastifyReply) {
  */
 export async function policiesRoutes(fastify: FastifyInstance) {
   fastify.get("/api/policies", getPolicies);
+  fastify.get("/api/policies/:id/analysis", getPolicyAnalysis); // Must be before /api/policies/:id
+  fastify.get("/api/policies/:id", getPolicy);
   fastify.post("/api/policies/upload", uploadPolicy);
   fastify.delete("/api/policies/:id", deletePolicy);
 }

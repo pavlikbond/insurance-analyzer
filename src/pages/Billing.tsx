@@ -123,7 +123,7 @@ export function Billing() {
               </li>
               <li className="flex items-center gap-2">
                 <Check className="h-4 w-4 text-primary" />
-                <span className="text-sm">Year-over-year comparisons</span>
+                <span className="text-sm">Year-over-year reports</span>
               </li>
               <li className="flex items-center gap-2">
                 <Check className="h-4 w-4 text-primary" />

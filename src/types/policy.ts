@@ -30,8 +30,12 @@ export interface UploadPolicyResponse {
 export interface Analysis {
   id: string;
   policyId: string;
-  summary: string;
-  keyTerms: {
+  aiModel: string;
+  analysisResult: string;
+  createdAt: string;
+  // Legacy fields for backwards compatibility
+  summary?: string;
+  keyTerms?: {
     deductible?: { amount: number; currency: string };
     coverageLimit?: { amount: number; currency: string };
     coverageTypes?: string[];
@@ -40,8 +44,6 @@ export interface Analysis {
   coverageDetails?: Record<string, unknown>;
   exclusions?: string[];
   premiums?: Record<string, unknown>;
-  aiModel: string;
-  createdAt: string;
   missedCoverage?: string[];
   coverageGaps?: string[];
   hiddenClauses?: string[];
