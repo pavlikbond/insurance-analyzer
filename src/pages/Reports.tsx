@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useReports } from "@/hooks/useReport";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { StatusChip } from "@/components/ui/status-chip";
 import { Button } from "@/components/ui/button";
 import { BarChart3, FileText } from "lucide-react";
 
@@ -50,9 +50,7 @@ export function Reports() {
                         {new Date(report.policy.coverageStart).toLocaleDateString()}
                         {report.policy.coverageEnd && ` - ${new Date(report.policy.coverageEnd).toLocaleDateString()}`}
                       </CardDescription>
-                      <Badge variant="outline" className="text-xs">
-                        {report.policy.status === "analyzed" ? "Analyzed" : report.policy.status}
-                      </Badge>
+                      <StatusChip status={report.policy.status} className="text-xs" />
                       <span className="text-xs text-muted-foreground">
                         {new Date(report.createdAt).toLocaleDateString()}
                       </span>

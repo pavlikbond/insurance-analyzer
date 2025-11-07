@@ -4,7 +4,7 @@ import { usePolicies } from "@/hooks/usePolicies";
 import { useDeletePolicy } from "@/hooks/usePolicies";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+import { StatusChip } from "@/components/ui/status-chip";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
@@ -107,19 +107,7 @@ export function Policies() {
                     </TableCell>
                     <TableCell className="max-w-[200px] truncate">{policy.description || "—"}</TableCell>
                     <TableCell>
-                      <Badge
-                        variant={
-                          policy.status === "analyzed"
-                            ? "default"
-                            : policy.status === "processing"
-                            ? "secondary"
-                            : policy.status === "failed"
-                            ? "destructive"
-                            : "outline"
-                        }
-                      >
-                        {policy.status}
-                      </Badge>
+                      <StatusChip status={policy.status} />
                     </TableCell>
                     <TableCell>{new Date(policy.uploadedAt).toLocaleDateString()}</TableCell>
                     <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>

@@ -5,7 +5,7 @@ import { useAnalysis } from "@/hooks/useAnalysis";
 import { useCreateAnalysis } from "@/hooks/useReport";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { StatusChip } from "@/components/ui/status-chip";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Download, ArrowLeft, FileText, Sparkles, Loader2 } from "lucide-react";
 import { AnalysisDisplay } from "@/components/analysis/AnalysisDisplay";
@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 export function PolicyDetail() {
   const { id } = useParams<{ id: string }>();
   const { data: policy, isLoading, refetch: refetchPolicy } = usePolicy(id!);
-  const { data: analysis, refetch: refetchAnalysis } = useAnalysis(id!);
+  const { data: analysis, isLoading: isAnalysisLoading, refetch: refetchAnalysis } = useAnalysis(id!);
   const createAnalysis = useCreateAnalysis();
   const [activeTab, setActiveTab] = useState("analysis");
   const [isExporting, setIsExporting] = useState(false);
@@ -127,19 +127,7 @@ export function PolicyDetail() {
           <div className="space-y-4">
             <div>
               <p className="text-sm font-medium text-muted-foreground mb-2">Status</p>
-              <Badge
-                variant={
-                  policy.status === "analyzed"
-                    ? "default"
-                    : policy.status === "processing"
-                    ? "secondary"
-                    : policy.status === "failed"
-                    ? "destructive"
-                    : "outline"
-                }
-              >
-                {policy.status}
-              </Badge>
+              <StatusChip status={policy.status} />
             </div>
             <div>
               <p className="text-sm font-medium text-muted-foreground mb-2">Coverage Period</p>
@@ -163,19 +151,7 @@ export function PolicyDetail() {
             <CardTitle className="text-sm font-medium">Status</CardTitle>
           </CardHeader>
           <CardContent>
-            <Badge
-              variant={
-                policy.status === "analyzed"
-                  ? "default"
-                  : policy.status === "processing"
-                  ? "secondary"
-                  : policy.status === "failed"
-                  ? "destructive"
-                  : "outline"
-              }
-            >
-              {policy.status}
-            </Badge>
+            <StatusChip status={policy.status} />
           </CardContent>
         </Card>
 
@@ -216,7 +192,14 @@ export function PolicyDetail() {
         </div>
 
         <TabsContent value="analysis" className="space-y-4">
-          {analysis ? (
+          {isAnalysisLoading ? (
+            <Card>
+              <CardContent className="py-8 text-center">
+                <Loader2 className="mx-auto h-12 w-12 mb-4 animate-spin text-primary" />
+                <p className="text-muted-foreground">Loading analysis...</p>
+              </CardContent>
+            </Card>
+          ) : analysis ? (
             <AnalysisDisplay analysis={analysis} policyId={policy.id} />
           ) : policy.status === "processing" ? (
             <Card>

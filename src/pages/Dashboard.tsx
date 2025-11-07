@@ -4,7 +4,7 @@ import { useUser } from "@/hooks/useUser";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Upload, BarChart3, AlertCircle } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { StatusChip } from "@/components/ui/status-chip";
 import { cn } from "@/lib/utils";
 
 export function Dashboard() {
@@ -159,7 +159,7 @@ export function Dashboard() {
                         {policy.coverageEnd && ` - ${new Date(policy.coverageEnd).toLocaleDateString()}`}
                       </div>
                     </div>
-                    <Badge variant={policy.status === "analyzed" ? "default" : "secondary"}>{policy.status}</Badge>
+                    <StatusChip status={policy.status} />
                   </Link>
                 ))}
               </div>

@@ -3,6 +3,7 @@ import { useSubscription } from "@/hooks/useUser";
 import { useCreateCheckout, useCancelSubscription } from "@/hooks/useBilling";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { StatusChip } from "@/components/ui/status-chip";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Check, Loader2 } from "lucide-react";
@@ -80,7 +81,7 @@ export function Billing() {
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Status</p>
-                <p className="text-sm capitalize">{subscription.status}</p>
+                <StatusChip status={subscription.status} />
               </div>
             </div>
 

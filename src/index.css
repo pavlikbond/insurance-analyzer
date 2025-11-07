@@ -5,39 +5,39 @@
 
 :root {
   --radius: 0.625rem;
-  /* Color scheme: isabelline, timberwolf, bistre, jet, linen, champagne_pink, pale_dogwood */
-  --background: #f5ebe0; /* linen - main background */
-  --foreground: #35291d; /* bistre - dark brown for text */
-  --card: #e2ddd6; /* custom - light neutral for cards */
-  --card-foreground: #35291d;
-  --popover: #e2ddd6;
-  --popover-foreground: #35291d;
-  --primary: #35291d; /* bistre - dark brown primary color */
-  --primary-foreground: #f5ebe0; /* linen - light text on primary for contrast */
-  --secondary: #d6ccc2; /* timberwolf - light beige secondary */
-  --secondary-foreground: #35291d;
-  --muted: #e3d5ca; /* champagne_pink - muted backgrounds */
-  --muted-foreground: #6b5847; /* medium brown for readable muted text */
-  --placeholder-foreground: #937a62; /* lighter brown specifically for input placeholders */
-  --accent: #d5bdaf; /* pale_dogwood - accents */
-  --accent-foreground: #35291d;
+  /* Color scheme: AnyDesk-inspired red palette */
+  --background: #ffffff; /* white - clean main background */
+  --foreground: #1a1a1a; /* dark gray - text */
+  --card: #f8f9fa; /* very light gray - cards */
+  --card-foreground: #1a1a1a;
+  --popover: #ffffff;
+  --popover-foreground: #1a1a1a;
+  --primary: #ef443b; /* AnyDesk red - primary color */
+  --primary-foreground: #ffffff; /* white text on primary */
+  --secondary: #e5e7eb; /* light gray - secondary */
+  --secondary-foreground: #1a1a1a;
+  --muted: #f3f4f6; /* muted backgrounds */
+  --muted-foreground: #6b7280; /* medium gray for readable muted text */
+  --placeholder-foreground: #9ca3af; /* lighter gray for input placeholders */
+  --accent: #fee2e2; /* light red/pink - subtle hover backgrounds */
+  --accent-foreground: #1a1a1a;
   --destructive: #dc2626; /* red for errors (keeping standard) */
-  --border: #d6ccc2; /* timberwolf - borders */
-  --input: #b8a598; /* darker shade for better input visibility */
-  --ring: #35291d; /* bistre - primary color for focus rings */
-  --chart-1: #35291d;
-  --chart-2: #d5bdaf;
-  --chart-3: #e3d5ca;
-  --chart-4: #d6ccc2;
-  --chart-5: #937a62;
-  --sidebar: #e2ddd6;
-  --sidebar-foreground: #35291d;
-  --sidebar-primary: #35291d;
-  --sidebar-primary-foreground: #f5ebe0;
-  --sidebar-accent: #d6ccc2;
-  --sidebar-accent-foreground: #35291d;
-  --sidebar-border: #d6ccc2;
-  --sidebar-ring: #35291d;
+  --border: #e5e7eb; /* light gray - borders */
+  --input: #f3f4f6; /* light gray for inputs */
+  --ring: #ef443b; /* AnyDesk red - focus rings */
+  --chart-1: #ef443b;
+  --chart-2: #dc2626;
+  --chart-3: #f87171;
+  --chart-4: #fca5a5;
+  --chart-5: #fecaca;
+  --sidebar: #f8f9fa;
+  --sidebar-foreground: #1a1a1a;
+  --sidebar-primary: #ef443b;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e5e7eb;
+  --sidebar-accent-foreground: #1a1a1a;
+  --sidebar-border: #e5e7eb;
+  --sidebar-ring: #ef443b;
 }
 
 /* Global link and body styles removed - using Tailwind utility classes instead */
@@ -88,39 +88,39 @@
 }
 
 .dark {
-  /* Dark mode using darker variants of the color scheme */
-  --background: #343332; /* jet - dark gray background */
-  --foreground: #f5ebe0; /* linen - light text */
-  --card: #363330; /* jet - slightly different dark gray for cards */
-  --card-foreground: #f5ebe0;
-  --popover: #363330;
-  --popover-foreground: #f5ebe0;
-  --primary: #d5bdaf; /* pale_dogwood - lighter accent for primary in dark mode */
-  --primary-foreground: #35291d; /* bistre - dark text on primary */
-  --secondary: #625241; /* timberwolf 200 - darker secondary */
-  --secondary-foreground: #f5ebe0;
-  --muted: #363330; /* jet - dark gray muted */
-  --muted-foreground: #e3d5ca;
-  --placeholder-foreground: #937a62; /* lighter color for placeholders in dark mode */
-  --accent: #937a62; /* timberwolf 300 - darker accent */
-  --accent-foreground: #f5ebe0;
+  /* Dark mode using AnyDesk-inspired dark theme */
+  --background: #0f172a; /* dark slate background */
+  --foreground: #f1f5f9; /* light gray text */
+  --card: #1e293b; /* slightly lighter dark slate for cards */
+  --card-foreground: #f1f5f9;
+  --popover: #1e293b;
+  --popover-foreground: #f1f5f9;
+  --primary: #f87171; /* lighter red for primary in dark mode */
+  --primary-foreground: #ffffff; /* white text on primary */
+  --secondary: #334155; /* medium slate - secondary */
+  --secondary-foreground: #f1f5f9;
+  --muted: #1e293b; /* dark slate muted */
+  --muted-foreground: #94a3b8;
+  --placeholder-foreground: #64748b; /* lighter color for placeholders in dark mode */
+  --accent: #7f1d1d; /* dark red background for dark mode hover */
+  --accent-foreground: #f1f5f9;
   --destructive: #dc2626;
-  --border: #5e5c5a; /* jet 600 - medium gray borders */
-  --input: #7a7876; /* darker shade for better input visibility in dark mode */
-  --ring: #d5bdaf; /* pale_dogwood - focus rings */
-  --chart-1: #d5bdaf;
-  --chart-2: #e3d5ca;
-  --chart-3: #d6ccc2;
-  --chart-4: #937a62;
-  --chart-5: #625241;
-  --sidebar: #363330;
-  --sidebar-foreground: #f5ebe0;
-  --sidebar-primary: #d5bdaf;
-  --sidebar-primary-foreground: #35291d;
-  --sidebar-accent: #625241;
-  --sidebar-accent-foreground: #f5ebe0;
-  --sidebar-border: #5e5c5a;
-  --sidebar-ring: #d5bdaf;
+  --border: #334155; /* medium slate borders */
+  --input: #1e293b; /* dark slate for inputs */
+  --ring: #f87171; /* red - focus rings */
+  --chart-1: #f87171;
+  --chart-2: #ef4444;
+  --chart-3: #fca5a5;
+  --chart-4: #fecaca;
+  --chart-5: #fee2e2;
+  --sidebar: #1e293b;
+  --sidebar-foreground: #f1f5f9;
+  --sidebar-primary: #f87171;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #334155;
+  --sidebar-accent-foreground: #f1f5f9;
+  --sidebar-border: #334155;
+  --sidebar-ring: #f87171;
 }
 
 @layer base {
