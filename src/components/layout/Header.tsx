@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { signOut } from "@/lib/auth";
+import { signOut } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -25,7 +25,16 @@ const mobileNavLinkPrimary =
 export function Header() {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Check if a route is active
+  const isActive = (path: string) => {
+    if (path === "/") {
+      return location.pathname === "/";
+    }
+    return location.pathname.startsWith(path);
+  };
 
   const handleSignOut = async () => {
     await signOut({
@@ -42,10 +51,13 @@ export function Header() {
   };
 
   return (
-    <header className="border-b bg-card">
+    <header className="border-b bg-background">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 cursor-pointer">
+          <Link
+            to="/"
+            className={cn("flex items-center gap-2 cursor-pointer transition-colors", isActive("/") && "opacity-80")}
+          >
             <FileText className="h-6 w-6" />
             <span className="text-xl font-bold">Insurance Analyzer</span>
           </Link>
@@ -54,16 +66,34 @@ export function Header() {
             <>
               {/* Desktop Navigation */}
               <nav className="hidden md:flex items-center gap-4">
-                <Link to="/dashboard" className={navLinkGhost}>
+                <Link
+                  to="/dashboard"
+                  className={cn(
+                    navLinkGhost,
+                    isActive("/dashboard") && "bg-accent text-accent-foreground font-semibold"
+                  )}
+                >
                   Dashboard
                 </Link>
-                <Link to="/policies" className={navLinkGhost}>
+                <Link
+                  to="/policies"
+                  className={cn(
+                    navLinkGhost,
+                    isActive("/policies") && "bg-accent text-accent-foreground font-semibold"
+                  )}
+                >
                   Policies
                 </Link>
-                <Link to="/reports" className={navLinkGhost}>
+                <Link
+                  to="/reports"
+                  className={cn(navLinkGhost, isActive("/reports") && "bg-accent text-accent-foreground font-semibold")}
+                >
                   Reports
                 </Link>
-                <Link to="/billing" className={navLinkGhost}>
+                <Link
+                  to="/billing"
+                  className={cn(navLinkGhost, isActive("/billing") && "bg-accent text-accent-foreground font-semibold")}
+                >
                   Billing
                 </Link>
 
@@ -75,7 +105,10 @@ export function Header() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => navigate("/settings")}>
+                    <DropdownMenuItem
+                      onClick={() => navigate("/settings")}
+                      className={isActive("/settings") ? "bg-accent" : ""}
+                    >
                       <Settings className="mr-2 h-4 w-4" />
                       Settings
                     </DropdownMenuItem>
@@ -167,23 +200,55 @@ export function Header() {
           <nav className="py-4 space-y-2 border-t">
             {isAuthenticated ? (
               <>
-                <Link to="/dashboard" onClick={closeMobileMenu} className={mobileNavLink}>
+                <Link
+                  to="/dashboard"
+                  onClick={closeMobileMenu}
+                  className={cn(
+                    mobileNavLink,
+                    isActive("/dashboard") && "bg-accent text-accent-foreground font-semibold"
+                  )}
+                >
                   Dashboard
                 </Link>
-                <Link to="/policies" onClick={closeMobileMenu} className={mobileNavLink}>
+                <Link
+                  to="/policies"
+                  onClick={closeMobileMenu}
+                  className={cn(
+                    mobileNavLink,
+                    isActive("/policies") && "bg-accent text-accent-foreground font-semibold"
+                  )}
+                >
                   Policies
                 </Link>
-                <Link to="/reports" onClick={closeMobileMenu} className={mobileNavLink}>
+                <Link
+                  to="/reports"
+                  onClick={closeMobileMenu}
+                  className={cn(
+                    mobileNavLink,
+                    isActive("/reports") && "bg-accent text-accent-foreground font-semibold"
+                  )}
+                >
                   Reports
                 </Link>
-                <Link to="/billing" onClick={closeMobileMenu} className={mobileNavLink}>
+                <Link
+                  to="/billing"
+                  onClick={closeMobileMenu}
+                  className={cn(
+                    mobileNavLink,
+                    isActive("/billing") && "bg-accent text-accent-foreground font-semibold"
+                  )}
+                >
                   Billing
                 </Link>
                 <div className="border-t pt-2 mt-2">
                   <Link
                     to="/settings"
                     onClick={closeMobileMenu}
-                    className={cn(mobileNavLink, "flex items-center gap-2")}
+                    className={cn(
+                      mobileNavLink,
+                      "flex items-center gap-2",
+                      isActive("/settings") && "bg-accent text-accent-foreground font-semibold"
+                    )}
                   >
                     <Settings className="h-4 w-4" />
                     Settings

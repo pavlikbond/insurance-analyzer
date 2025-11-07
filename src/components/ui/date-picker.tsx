@@ -64,7 +64,11 @@ export function DatePicker({
           variant="outline"
           disabled={disabled}
           data-empty={!value}
-          className={cn("w-full justify-start text-left font-normal", !value && "text-muted-foreground", className)}
+          className={cn(
+            "w-full justify-start text-left font-normal",
+            !value && "text-placeholder-foreground",
+            className
+          )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
           {value ? format(date!, "PPP") : <span>{placeholder}</span>}

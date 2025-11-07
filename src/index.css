@@ -5,38 +5,39 @@
 
 :root {
   --radius: 0.625rem;
-  /* Color scheme: ["#ccd5ae","#e9edc9","#fefae0","#faedcd","#d4a373"] */
-  --background: #fefae0; /* cream - main background */
-  --foreground: #3d3528; /* dark brown for text */
-  --card: #fefae0; /* cream */
-  --card-foreground: #3d3528;
-  --popover: #fefae0;
-  --popover-foreground: #3d3528;
-  --primary: #d4a373; /* brown/tan - primary color */
-  --primary-foreground: #2a241a; /* dark brown text on primary for contrast */
-  --secondary: #e9edc9; /* very light green - secondary */
-  --secondary-foreground: #3d3528;
-  --muted: #faedcd; /* light tan - muted backgrounds */
-  --muted-foreground: #5a4f3f;
-  --accent: #ccd5ae; /* light green - accents */
-  --accent-foreground: #3d3528;
+  /* Color scheme: isabelline, timberwolf, bistre, jet, linen, champagne_pink, pale_dogwood */
+  --background: #f5ebe0; /* linen - main background */
+  --foreground: #35291d; /* bistre - dark brown for text */
+  --card: #e2ddd6; /* custom - light neutral for cards */
+  --card-foreground: #35291d;
+  --popover: #e2ddd6;
+  --popover-foreground: #35291d;
+  --primary: #35291d; /* bistre - dark brown primary color */
+  --primary-foreground: #f5ebe0; /* linen - light text on primary for contrast */
+  --secondary: #d6ccc2; /* timberwolf - light beige secondary */
+  --secondary-foreground: #35291d;
+  --muted: #e3d5ca; /* champagne_pink - muted backgrounds */
+  --muted-foreground: #6b5847; /* medium brown for readable muted text */
+  --placeholder-foreground: #937a62; /* lighter brown specifically for input placeholders */
+  --accent: #d5bdaf; /* pale_dogwood - accents */
+  --accent-foreground: #35291d;
   --destructive: #dc2626; /* red for errors (keeping standard) */
-  --border: #faedcd; /* light tan for borders */
-  --input: #faedcd;
-  --ring: #d4a373; /* primary color for focus rings */
-  --chart-1: #d4a373;
-  --chart-2: #ccd5ae;
-  --chart-3: #faedcd;
-  --chart-4: #e9edc9;
-  --chart-5: #b8a082;
-  --sidebar: #faedcd;
-  --sidebar-foreground: #3d3528;
-  --sidebar-primary: #d4a373;
-  --sidebar-primary-foreground: #2a241a;
-  --sidebar-accent: #e9edc9;
-  --sidebar-accent-foreground: #3d3528;
-  --sidebar-border: #faedcd;
-  --sidebar-ring: #d4a373;
+  --border: #d6ccc2; /* timberwolf - borders */
+  --input: #b8a598; /* darker shade for better input visibility */
+  --ring: #35291d; /* bistre - primary color for focus rings */
+  --chart-1: #35291d;
+  --chart-2: #d5bdaf;
+  --chart-3: #e3d5ca;
+  --chart-4: #d6ccc2;
+  --chart-5: #937a62;
+  --sidebar: #e2ddd6;
+  --sidebar-foreground: #35291d;
+  --sidebar-primary: #35291d;
+  --sidebar-primary-foreground: #f5ebe0;
+  --sidebar-accent: #d6ccc2;
+  --sidebar-accent-foreground: #35291d;
+  --sidebar-border: #d6ccc2;
+  --sidebar-ring: #35291d;
 }
 
 /* Global link and body styles removed - using Tailwind utility classes instead */
@@ -64,6 +65,7 @@
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
+  --color-placeholder-foreground: var(--placeholder-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
@@ -87,37 +89,38 @@
 
 .dark {
   /* Dark mode using darker variants of the color scheme */
-  --background: #2a241a; /* dark brown background */
-  --foreground: #fefae0; /* cream text */
-  --card: #3d3528; /* dark tan card */
-  --card-foreground: #fefae0;
-  --popover: #3d3528;
-  --popover-foreground: #fefae0;
-  --primary: #d4a373; /* keep primary color */
-  --primary-foreground: #2a241a; /* dark text on primary */
-  --secondary: #5a4f3f; /* darker green-tan */
-  --secondary-foreground: #fefae0;
-  --muted: #3d3528; /* dark tan */
-  --muted-foreground: #ccd5ae;
-  --accent: #b8a082; /* darker accent */
-  --accent-foreground: #fefae0;
+  --background: #343332; /* jet - dark gray background */
+  --foreground: #f5ebe0; /* linen - light text */
+  --card: #363330; /* jet - slightly different dark gray for cards */
+  --card-foreground: #f5ebe0;
+  --popover: #363330;
+  --popover-foreground: #f5ebe0;
+  --primary: #d5bdaf; /* pale_dogwood - lighter accent for primary in dark mode */
+  --primary-foreground: #35291d; /* bistre - dark text on primary */
+  --secondary: #625241; /* timberwolf 200 - darker secondary */
+  --secondary-foreground: #f5ebe0;
+  --muted: #363330; /* jet - dark gray muted */
+  --muted-foreground: #e3d5ca;
+  --placeholder-foreground: #937a62; /* lighter color for placeholders in dark mode */
+  --accent: #937a62; /* timberwolf 300 - darker accent */
+  --accent-foreground: #f5ebe0;
   --destructive: #dc2626;
-  --border: #5a4f3f;
-  --input: #5a4f3f;
-  --ring: #d4a373;
-  --chart-1: #d4a373;
-  --chart-2: #ccd5ae;
-  --chart-3: #faedcd;
-  --chart-4: #e9edc9;
-  --chart-5: #b8a082;
-  --sidebar: #3d3528;
-  --sidebar-foreground: #fefae0;
-  --sidebar-primary: #d4a373;
-  --sidebar-primary-foreground: #2a241a;
-  --sidebar-accent: #5a4f3f;
-  --sidebar-accent-foreground: #fefae0;
-  --sidebar-border: #5a4f3f;
-  --sidebar-ring: #d4a373;
+  --border: #5e5c5a; /* jet 600 - medium gray borders */
+  --input: #7a7876; /* darker shade for better input visibility in dark mode */
+  --ring: #d5bdaf; /* pale_dogwood - focus rings */
+  --chart-1: #d5bdaf;
+  --chart-2: #e3d5ca;
+  --chart-3: #d6ccc2;
+  --chart-4: #937a62;
+  --chart-5: #625241;
+  --sidebar: #363330;
+  --sidebar-foreground: #f5ebe0;
+  --sidebar-primary: #d5bdaf;
+  --sidebar-primary-foreground: #35291d;
+  --sidebar-accent: #625241;
+  --sidebar-accent-foreground: #f5ebe0;
+  --sidebar-border: #5e5c5a;
+  --sidebar-ring: #d5bdaf;
 }
 
 @layer base {

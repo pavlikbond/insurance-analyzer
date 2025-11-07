@@ -1,7 +1,7 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
-import { ErrorCode } from "../types/index.js";
-import { sendErrorResponse } from "../utils/errors.js";
-import { auth } from "../utils/auth.js";
+import { ErrorCode } from "../types/index";
+import { sendErrorResponse } from "../utils/errors";
+import { auth } from "../utils/auth";
 
 // Get user from Better-Auth session
 export async function authenticate(request: FastifyRequest, reply: FastifyReply): Promise<void> {
