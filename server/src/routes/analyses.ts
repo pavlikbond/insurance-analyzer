@@ -8,6 +8,7 @@ import { db } from "../db/index.js";
 import { contracts, analyses } from "../db/schema.js";
 import { requireAuth } from "../middleware/auth.js";
 import { sendErrorResponse } from "../utils/errors.js";
+import { sendAnalysisCompleteEmail } from "../utils/email.js";
 import { ErrorCode } from "../types/index.js";
 
 // Initialize S3 client
@@ -233,6 +234,19 @@ async function createAnalysis(request: FastifyRequest, reply: FastifyReply) {
         .where(eq(contracts.id, policyId));
 
       request.log.info(`Analysis stored successfully with id: ${newAnalysis.id}`);
+
+      // Send email notification (non-blocking - don't fail if email fails)
+      sendAnalysisCompleteEmail(
+        user.email,
+        user.name,
+        contract.originalFileName,
+        newAnalysis.id,
+        policyId,
+        request.log
+      ).catch((error) => {
+        // Log error but don't throw - analysis was successful
+        request.log.error(error, "Failed to send analysis complete email (non-critical)");
+      });
 
       return reply.status(201).send({
         success: true,

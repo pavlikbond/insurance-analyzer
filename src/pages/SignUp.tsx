@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, Navigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -10,6 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Eye, EyeOff } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 const signUpSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -21,6 +22,7 @@ type SignUpForm = z.infer<typeof signUpSchema>;
 
 export function SignUp() {
   const navigate = useNavigate();
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -34,6 +36,27 @@ export function SignUp() {
       password: "",
     },
   });
+
+  // Redirect to dashboard if already authenticated
+  useEffect(() => {
+    if (!isAuthLoading && isAuthenticated) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [isAuthenticated, isAuthLoading, navigate]);
+
+  // Show loading state while checking authentication
+  if (isAuthLoading) {
+    return (
+      <div className="-mx-4 -my-8 flex items-center justify-center px-6" style={{ height: "calc(100vh - 4rem)" }}>
+        <div className="text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
+
+  // Redirect if authenticated (fallback in case navigate doesn't work)
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const onSubmit = async (data: SignUpForm) => {
     setError(null);
