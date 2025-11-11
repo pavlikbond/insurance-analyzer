@@ -1,69 +1,49 @@
-import { useState, useEffect } from "react";
-import { Link, useNavigate, Navigate } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { signIn, authClient } from "@/lib/auth-client";
+import { signUp, authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Eye, EyeOff } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
 
-const signInSchema = z.object({
+const signUpSchema = z.object({
+  name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email address"),
-  password: z.string().min(1, "Password is required"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
-type SignInForm = z.infer<typeof signInSchema>;
+type SignUpForm = z.infer<typeof signUpSchema>;
 
-export function SignIn() {
+export function SignUp() {
   const navigate = useNavigate();
-  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
-  const form = useForm<SignInForm>({
-    resolver: zodResolver(signInSchema),
+  const form = useForm<SignUpForm>({
+    resolver: zodResolver(signUpSchema),
     defaultValues: {
+      name: "",
       email: "",
       password: "",
     },
   });
 
-  // Redirect to dashboard if already authenticated
-  useEffect(() => {
-    if (!isAuthLoading && isAuthenticated) {
-      navigate("/dashboard", { replace: true });
-    }
-  }, [isAuthenticated, isAuthLoading, navigate]);
-
-  // Show loading state while checking authentication
-  if (isAuthLoading) {
-    return (
-      <div className="-mx-4 -my-8 flex items-center justify-center px-6" style={{ height: "calc(100vh - 4rem)" }}>
-        <div className="text-muted-foreground">Loading...</div>
-      </div>
-    );
-  }
-
-  // Redirect if authenticated (fallback in case navigate doesn't work)
-  if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  const onSubmit = async (data: SignInForm) => {
+  const onSubmit = async (data: SignUpForm) => {
     setError(null);
     setIsLoading(true);
 
-    const { error: signInError } = await signIn.email(
+    const { error: signUpError } = await signUp.email(
       {
         email: data.email,
         password: data.password,
+        name: data.name,
         callbackURL: "/dashboard",
       },
       {
@@ -75,15 +55,15 @@ export function SignIn() {
           navigate("/dashboard");
         },
         onError: (ctx) => {
-          setError(ctx.error.message || "Failed to sign in");
+          setError(ctx.error.message || "Failed to sign up");
           setIsLoading(false);
         },
       }
     );
 
     // Handle error if callbacks didn't
-    if (signInError && !error) {
-      setError(signInError.message || "Failed to sign in");
+    if (signUpError && !error) {
+      setError(signUpError.message || "Failed to sign up");
       setIsLoading(false);
     }
   };
@@ -95,21 +75,10 @@ export function SignIn() {
     try {
       // Use absolute URL with frontend origin so redirect goes to frontend, not backend
       const callbackURL = `${window.location.origin}/dashboard`;
-      await authClient.signIn.social(
-        {
-          provider: "google",
-          callbackURL,
-        },
-        {
-          onSuccess: () => {
-            navigate("/dashboard");
-          },
-          onError: (err) => {
-            setError(err.error.message);
-            setIsGoogleLoading(false);
-          },
-        }
-      );
+      await authClient.signIn.social({
+        provider: "google",
+        callbackURL,
+      });
       // Better Auth will handle the redirect automatically
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to sign in with Google";
@@ -122,8 +91,8 @@ export function SignIn() {
     <div className="-mx-4 -my-8 flex items-center justify-center px-6" style={{ height: "calc(100vh - 4rem)" }}>
       <Card className="w-full max-w-lg">
         <CardHeader>
-          <CardTitle className="text-3xl font-bold">Sign In</CardTitle>
-          <CardDescription>Enter your credentials to access your account</CardDescription>
+          <CardTitle className="text-3xl font-bold">Sign Up</CardTitle>
+          <CardDescription>Create a new account to get started</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -134,6 +103,20 @@ export function SignIn() {
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
+
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="John Doe" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}
@@ -179,7 +162,7 @@ export function SignIn() {
               />
 
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Signing in..." : "Sign In"}
+                {isLoading ? "Creating account..." : "Sign Up"}
               </Button>
             </form>
           </Form>
@@ -198,7 +181,7 @@ export function SignIn() {
             disabled={isGoogleLoading || isLoading}
           >
             {isGoogleLoading ? (
-              "Signing in..."
+              "Signing up..."
             ) : (
               <>
                 <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
@@ -219,15 +202,15 @@ export function SignIn() {
                     fill="#EA4335"
                   />
                 </svg>
-                Sign in with Google
+                Sign up with Google
               </>
             )}
           </Button>
 
           <div className="mt-4 text-center text-sm">
-            <span className="text-muted-foreground">Don't have an account? </span>
-            <Link to="/signup" className="text-primary hover:underline">
-              Sign up
+            <span className="text-muted-foreground">Already have an account? </span>
+            <Link to="/signin" className="text-primary hover:underline">
+              Sign in
             </Link>
           </div>
         </CardContent>

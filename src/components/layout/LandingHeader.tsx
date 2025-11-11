@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 import { signOut } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import {
@@ -132,16 +132,32 @@ export function LandingHeader() {
           <nav className="py-4 space-y-2 border-t">
             {isAuthenticated ? (
               <>
-                <Link to="/dashboard" onClick={closeMobileMenu} className="block px-4 py-2 rounded-md hover:bg-accent transition-colors">
+                <Link
+                  to="/dashboard"
+                  onClick={closeMobileMenu}
+                  className="block px-4 py-2 rounded-md hover:bg-accent transition-colors"
+                >
                   Dashboard
                 </Link>
-                <Link to="/policies" onClick={closeMobileMenu} className="block px-4 py-2 rounded-md hover:bg-accent transition-colors">
+                <Link
+                  to="/policies"
+                  onClick={closeMobileMenu}
+                  className="block px-4 py-2 rounded-md hover:bg-accent transition-colors"
+                >
                   Policies
                 </Link>
-                <Link to="/reports" onClick={closeMobileMenu} className="block px-4 py-2 rounded-md hover:bg-accent transition-colors">
+                <Link
+                  to="/reports"
+                  onClick={closeMobileMenu}
+                  className="block px-4 py-2 rounded-md hover:bg-accent transition-colors"
+                >
                   Reports
                 </Link>
-                <Link to="/billing" onClick={closeMobileMenu} className="block px-4 py-2 rounded-md hover:bg-accent transition-colors">
+                <Link
+                  to="/billing"
+                  onClick={closeMobileMenu}
+                  className="block px-4 py-2 rounded-md hover:bg-accent transition-colors"
+                >
                   Billing
                 </Link>
                 <div className="border-t pt-2 mt-2">
@@ -185,10 +201,18 @@ export function LandingHeader() {
                 >
                   Pricing
                 </a>
-                <Link to="/signin" onClick={closeMobileMenu} className="block px-4 py-2 rounded-md hover:bg-accent transition-colors">
+                <Link
+                  to="/signin"
+                  onClick={closeMobileMenu}
+                  className="block px-4 py-2 rounded-md hover:bg-accent transition-colors"
+                >
                   Sign In
                 </Link>
-                <Link to="/signup" onClick={closeMobileMenu} className="block px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
+                <Link
+                  to="/signup"
+                  onClick={closeMobileMenu}
+                  className="block px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                >
                   Sign Up
                 </Link>
               </>

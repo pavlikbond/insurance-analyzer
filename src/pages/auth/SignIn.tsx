@@ -1,92 +1,78 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate, Navigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { signUp, authClient } from "@/lib/auth-client";
+import { signIn, authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, Eye, EyeOff } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { AlertCircle, Eye, EyeOff, CheckCircle2 } from "lucide-react";
 
-const signUpSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+const signInSchema = z.object({
   email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  password: z.string().min(1, "Password is required"),
 });
 
-type SignUpForm = z.infer<typeof signUpSchema>;
+type SignInForm = z.infer<typeof signInSchema>;
 
-export function SignUp() {
+export function SignIn() {
   const navigate = useNavigate();
-  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const [searchParams] = useSearchParams();
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
-  const form = useForm<SignUpForm>({
-    resolver: zodResolver(signUpSchema),
+  // Check for success message from password reset
+  useEffect(() => {
+    if (searchParams.get("reset") === "success") {
+      setSuccess("Your password has been reset successfully. Please sign in with your new password.");
+      // Clear the query parameter
+      navigate("/signin", { replace: true });
+    }
+  }, [searchParams, navigate]);
+
+  const form = useForm<SignInForm>({
+    resolver: zodResolver(signInSchema),
     defaultValues: {
-      name: "",
       email: "",
       password: "",
     },
   });
 
-  // Redirect to dashboard if already authenticated
-  useEffect(() => {
-    if (!isAuthLoading && isAuthenticated) {
-      navigate("/dashboard", { replace: true });
-    }
-  }, [isAuthenticated, isAuthLoading, navigate]);
-
-  // Show loading state while checking authentication
-  if (isAuthLoading) {
-    return (
-      <div className="-mx-4 -my-8 flex items-center justify-center px-6" style={{ height: "calc(100vh - 4rem)" }}>
-        <div className="text-muted-foreground">Loading...</div>
-      </div>
-    );
-  }
-
-  // Redirect if authenticated (fallback in case navigate doesn't work)
-  if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  const onSubmit = async (data: SignUpForm) => {
+  const onSubmit = async (data: SignInForm) => {
     setError(null);
     setIsLoading(true);
 
-    const { error: signUpError } = await signUp.email(
+    const { error: signInError } = await signIn.email(
       {
         email: data.email,
         password: data.password,
-        name: data.name,
         callbackURL: "/dashboard",
       },
       {
         onRequest: () => {
           setIsLoading(true);
         },
-        onSuccess: () => {
-          // Better Auth handles redirect via callbackURL
+        onSuccess: async () => {
+          // This ensures the session is updated before navigating, preventing duplicate requests
           navigate("/dashboard");
+          setIsLoading(false);
         },
         onError: (ctx) => {
-          setError(ctx.error.message || "Failed to sign up");
+          setError(ctx.error.message || "Failed to sign in");
           setIsLoading(false);
         },
       }
     );
 
     // Handle error if callbacks didn't
-    if (signUpError && !error) {
-      setError(signUpError.message || "Failed to sign up");
+    if (signInError && !error) {
+      setError(signInError.message || "Failed to sign in");
       setIsLoading(false);
     }
   };
@@ -98,10 +84,24 @@ export function SignUp() {
     try {
       // Use absolute URL with frontend origin so redirect goes to frontend, not backend
       const callbackURL = `${window.location.origin}/dashboard`;
-      await authClient.signIn.social({
-        provider: "google",
-        callbackURL,
-      });
+      await authClient.signIn.social(
+        {
+          provider: "google",
+          callbackURL,
+        },
+        {
+          onSuccess: async () => {
+            // Wait a brief moment for Better-Auth to update the session query
+            await new Promise((resolve) => setTimeout(resolve, 100));
+            navigate("/dashboard");
+            setIsGoogleLoading(false);
+          },
+          onError: (err) => {
+            setError(err.error.message);
+            setIsGoogleLoading(false);
+          },
+        }
+      );
       // Better Auth will handle the redirect automatically
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to sign in with Google";
@@ -114,32 +114,24 @@ export function SignUp() {
     <div className="-mx-4 -my-8 flex items-center justify-center px-6" style={{ height: "calc(100vh - 4rem)" }}>
       <Card className="w-full max-w-lg">
         <CardHeader>
-          <CardTitle className="text-3xl font-bold">Sign Up</CardTitle>
-          <CardDescription>Create a new account to get started</CardDescription>
+          <CardTitle className="text-3xl font-bold">Sign In</CardTitle>
+          <CardDescription>Enter your credentials to access your account</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              {success && (
+                <Alert>
+                  <CheckCircle2 className="h-4 w-4" />
+                  <AlertDescription>{success}</AlertDescription>
+                </Alert>
+              )}
               {error && (
                 <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
-
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="John Doe" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
 
               <FormField
                 control={form.control}
@@ -184,8 +176,14 @@ export function SignUp() {
                 )}
               />
 
+              <div className="text-right">
+                <Link to="/forgot-password" className="text-sm text-primary hover:underline">
+                  Forgot password?
+                </Link>
+              </div>
+
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Creating account..." : "Sign Up"}
+                {isLoading ? "Signing in..." : "Sign In"}
               </Button>
             </form>
           </Form>
@@ -204,7 +202,7 @@ export function SignUp() {
             disabled={isGoogleLoading || isLoading}
           >
             {isGoogleLoading ? (
-              "Signing up..."
+              "Signing in..."
             ) : (
               <>
                 <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
@@ -225,15 +223,15 @@ export function SignUp() {
                     fill="#EA4335"
                   />
                 </svg>
-                Sign up with Google
+                Sign in with Google
               </>
             )}
           </Button>
 
           <div className="mt-4 text-center text-sm">
-            <span className="text-muted-foreground">Already have an account? </span>
-            <Link to="/signin" className="text-primary hover:underline">
-              Sign in
+            <span className="text-muted-foreground">Don't have an account? </span>
+            <Link to="/signup" className="text-primary hover:underline">
+              Sign up
             </Link>
           </div>
         </CardContent>

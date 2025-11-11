@@ -1,5 +1,4 @@
-import { Outlet } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 import { AppLayout } from "./AppLayout";
 import { LandingLayout } from "./LandingLayout";
 
@@ -22,4 +21,3 @@ export function ConditionalLayout() {
   // When not authenticated, use LandingLayout (landing page with Features/Pricing)
   return isAuthenticated ? <AppLayout /> : <LandingLayout />;
 }
-

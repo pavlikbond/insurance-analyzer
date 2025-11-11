@@ -1,11 +1,15 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
-interface ProtectedRouteProps {
+interface GuestRouteProps {
   children: React.ReactNode;
 }
 
-export function ProtectedRoute({ children }: ProtectedRouteProps) {
+/**
+ * Route guard for guest-only pages (sign in, sign up, etc.)
+ * Redirects authenticated users to dashboard
+ */
+export function GuestRoute({ children }: GuestRouteProps) {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
@@ -16,8 +20,8 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
-  if (!isAuthenticated) {
-    return <Navigate to="/signin" replace />;
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return <>{children}</>;

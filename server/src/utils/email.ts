@@ -125,3 +125,97 @@ export async function sendAnalysisCompleteEmail(
     // Don't throw - we don't want email failures to break the analysis flow
   }
 }
+
+/**
+ * Generate HTML email template for password reset
+ */
+function generatePasswordResetEmailHtml(displayName: string, resetUrl: string): string {
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Reset Your Password</title>
+      </head>
+      <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: ${EMAIL_COLORS.foreground}; max-width: 600px; margin: 0 auto; padding: 20px; background-color: ${EMAIL_COLORS.background};">
+        <div style="background: ${EMAIL_COLORS.primary}; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
+          <h1 style="color: ${EMAIL_COLORS.primaryForeground}; margin: 0; font-size: 24px; font-weight: 600;">Reset Your Password</h1>
+        </div>
+        
+        <div style="background: ${EMAIL_COLORS.card}; padding: 30px; border-radius: 0 0 8px 8px; border: 1px solid ${EMAIL_COLORS.border}; border-top: none;">
+          <p style="font-size: 16px; margin-top: 0; color: ${EMAIL_COLORS.foreground}; line-height: 1.6;">Hi ${displayName},</p>
+          
+          <p style="font-size: 16px; color: ${EMAIL_COLORS.foreground}; line-height: 1.6;">
+            We received a request to reset your password for your Insurance Analyzer account. If you didn't make this request, you can safely ignore this email.
+          </p>
+          
+          <p style="font-size: 16px; color: ${EMAIL_COLORS.foreground}; line-height: 1.6;">
+            To reset your password, click the button below:
+          </p>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${resetUrl}" 
+               style="display: inline-block; background: ${EMAIL_COLORS.primary}; color: ${EMAIL_COLORS.primaryForeground}; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">
+              Reset Password
+            </a>
+          </div>
+          
+          <p style="font-size: 14px; color: ${EMAIL_COLORS.mutedForeground}; margin-top: 30px; padding-top: 20px; border-top: 1px solid ${EMAIL_COLORS.border}; line-height: 1.6;">
+            This link will expire in 1 hour for security reasons. If you need to reset your password again, you can request a new link from the sign-in page.
+          </p>
+          
+          <p style="font-size: 14px; color: ${EMAIL_COLORS.mutedForeground}; margin-top: 20px; line-height: 1.6;">
+            If the button doesn't work, you can copy and paste this link into your browser:
+          </p>
+          
+          <p style="font-size: 12px; color: ${EMAIL_COLORS.mutedForeground}; word-break: break-all; background: ${EMAIL_COLORS.muted}; padding: 10px; border-radius: 4px; margin: 10px 0;">
+            ${resetUrl}
+          </p>
+          
+          <p style="font-size: 14px; color: ${EMAIL_COLORS.mutedForeground}; margin-top: 20px; line-height: 1.6;">
+            If you have any questions or concerns, feel free to reach out to our support team.
+          </p>
+          
+          <p style="font-size: 14px; color: ${EMAIL_COLORS.mutedForeground}; margin-top: 20px; margin-bottom: 0; line-height: 1.6;">
+            Best regards,<br>
+            The Insurance Analyzer Team
+          </p>
+        </div>
+      </body>
+    </html>
+  `;
+}
+
+/**
+ * Send password reset email
+ */
+export async function sendPasswordResetEmail(
+  userEmail: string,
+  userName: string | undefined,
+  resetUrl: string,
+  log: FastifyRequest["log"]
+): Promise<void> {
+  try {
+    const displayName = userName || "there";
+
+    const html = generatePasswordResetEmailHtml(displayName, resetUrl);
+
+    const { data, error } = await resend.emails.send({
+      from: "Insurance Analyzer <onboarding@resend.dev>", // TODO: Update with your verified domain
+      to: [userEmail],
+      subject: "Reset Your Password - Insurance Analyzer",
+      html,
+    });
+
+    if (error) {
+      log.error(error, "Failed to send password reset email");
+      throw error;
+    }
+
+    log.info(`Password reset email sent successfully to ${userEmail}, Resend ID: ${data?.id}`);
+  } catch (error) {
+    log.error(error, "Error sending password reset email");
+    // Don't throw - Better-Auth will handle the error appropriately
+  }
+}
