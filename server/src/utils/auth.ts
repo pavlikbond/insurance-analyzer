@@ -19,6 +19,8 @@ export const auth = betterAuth({
   trustedOrigins: [frontendOrigin],
   emailAndPassword: {
     enabled: true,
+    // Minimum password length - matches frontend validation
+    minPasswordLength: 8,
     sendResetPassword: async ({ user, url }) => {
       // This function is called by Better-Auth when a password reset is requested
       // Since Better-Auth doesn't pass FastifyRequest directly, we create a simple logger
